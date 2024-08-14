@@ -1,0 +1,72 @@
+<div id="trainings">
+  <% @trainings.each do |t| %>
+    <div class="training">
+      <p>種目:<%= t.menu %></p>
+      <p>重量:<%= t.weight %></p>
+      <p>回数:<%= t.body %></p>
+      <%= button_to "削除", training_path(t), method: :delete %>
+    </div>
+  <% end %>
+</div>
+
+<h2>種目を追加</h2>
+<div id="training-forms">
+  <%= form_with model: @training, local: false, class: 'training-form' do |f| %>
+    <div>
+      <%= f.label :menu, "種目" %>
+      <%= f.text_field :menu %>
+    </div>
+    <div>
+      <%= f.label :weight, "重量" %>
+      <%= f.number_field :weight %>
+    </div>
+    <div>
+      <%= f.label :body, "回数" %>
+      <%= f.number_field :body %>
+    </div>
+    <%= f.submit "保存" %>
+  <% end %>
+</div>
+
+<button id="add-training-form">種目を追加</button>
+
+<%= link_to "履歴", trainings_path %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const addFormButton = document.getElementById('add-training-form');
+  const formsContainer = document.getElementById('training-forms');
+
+  addFormButton.addEventListener('click', function() {
+    const newForm = formsContainer.querySelector('.training-form').cloneNode(true);
+    newForm.reset();
+    formsContainer.appendChild(newForm);
+  });
+
+  formsContainer.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      }
+    }).then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('保存しました');
+          form.reset();
+        } else {
+          alert('エラーが発生しました');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('エラーが発生しました');
+      });
+  });
+});
+</script>
